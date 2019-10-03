@@ -129,3 +129,4 @@ Setting Winners
 * What could we do better?
 
 - Why not make withdrawing the difference between the bid amount and mask amount happen at withdrawal time?
+- Unrevealed bids could have been revealed during early withdrawal

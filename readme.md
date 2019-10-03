@@ -1,0 +1,1 @@
+https://talks.godoc.org/github.com/DaveAppleton//ETHKL-2019-10-02/auction.slide
