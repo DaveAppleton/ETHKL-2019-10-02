@@ -1,0 +1,131 @@
+The Devcon 5 Auction
+A provably fair auction
+
+2nd Oct 2019
+Dave Appleton
+dave@hellogold.com
+@AppletonDave
+
+* Brought to you by ether cards
+
+.image images/kartya-01.png 
+.image images/kartya-06.png 
+
+* Provably fair ticket distribution
+
+This year ether cards and the ethereum foundation started an experiment to see if we could offer provably fair methods of ticket distribution.
+
+- Provably Fair Raffle
+The contract holds the hash of a pregenerated distribution selection list. This list is used to select winners. Results can be verified.
+
+- Provably Fair Auction
+
+Bids are masked during the bidding period by allowing you to deposit more than your bid. Bids are revealed then the winners selected.
+
+* Provably fair Raffle
+
+- Contract holds the hash of a pregenerated distribution selection list.
+- Bidding Period : participate by sending the ticket price. 
+- Participation is recorded with a serial number.
+- At end of raffle, set number of tickets (N) and pass in the generated array.
+- First N array entries where val < numEntries are winners
+- Publish array to allow people to use it as proof
+
+* Provably Fair Auction
+
+- Amount Bid can be hidden (within limits)
+- Winning list transparent and provable
+
+Periods during process
+
+- Bidding
+- Reveal
+- Winner Selection
+- Withdrawal
+- Ticket Distribution
+
+* Bidding (during preset bidding period)
+
+- Decide how much to bid (bid amount)
+- Decide how much deposit to send (mask amount)
+- Generate a ramdom string (mask phrase)
+- Create the hash of the bid amount and the mask phrase
+- Send the mask amount + hash to the contract's bidding function
+
+Bid is accepted if
+1. no prior bids from that address
+2. mask amount > minimum bid amount 
+
+* Reveal (during reveal period, after biddng period)
+
+- send Bid Amount + mask phrase to Reveal function
+
+bid is marked as revealed if
+1. Bid hasn't been revealed before
+2. hash of bid + mask phrase matches hash supplied when bidding
+3. bid amount > minimum bid
+
+* Winner Selection
+
+- Offline process where N = number of tix
+from the reveal events, select lowest of top N bids = winning amount
+everybody bidding higher that winning amount wins 
+if there is a tie at winning amount, those who _reveal_ first have priority
+
+* Withdrawal
+
+- Winners can withdraw the difference between the mask amount and the bid amount
+- The rest can withdraw their mask amounts
+
+* Examining the contract
+
+.code contracts/auction.sol /start struct OMIT/,/end struct OMIT/
+
+Data
+`hashValue` = the hash supplied when bidding
+`value` = the mask amount
+`bid` = the amount bid (only learned at reveal)
+
+`flagged` = set to mark winners who tie at winning amount
+
+* Constructor 
+
+.code contracts/auction.sol /start constructor OMIT/,/end constructor OMIT/
+
+* Bidding 
+
+.code contracts/auction.sol /start bidding OMIT/,/end bidding OMIT/
+
+.code contracts/auction.sol /start calchash OMIT/,/end calchash OMIT/
+
+* Reveal
+
+.code contracts/auction.sol /end bidding OMIT/,/end reveal OMIT/
+
+* Set Winner
+
+- get all the BidRevealed events and work out the winning amount
+- set winning amount (if oversubscribed)
+- set winning amount minus 1 wei if NOT oversubscribed or no tie
+- set chosen winners who have exactly winning amount if oversubscribed
+
+* Set Winner
+
+Helpers
+.code contracts/auction.sol /end struct OMIT/,/end helpers OMIT/
+
+Setting Winners
+.code contracts/auction.sol /end reveal OMIT/,/end set winners OMIT/
+
+
+* Did I win? How much can I withdraw?
+
+.code contracts/auction.sol /end calchash OMIT/,/end iswinner OMIT/
+
+* Getting Funds for the foundation
+
+.code contracts/auction.sol /begin withdraw OMIT/,/start calchash OMIT/
+
+* What could we do better?
+
+- Why not make withdrawing the difference between the bid amount and mask amount happen at withdrawal time?
